@@ -21,7 +21,7 @@ import java.util.Scanner;
                     case 1 ->  inserirDados();
                     case 2 -> consultarTodos();
                     case 3 -> buscarAluno();
-                    case 4 -> 
+                    case 4 -> atualizarAluno();
                     default -> System.out.println("Opção Invalida!");
                 }
 
@@ -44,20 +44,43 @@ import java.util.Scanner;
         }
 
         private static void atualizarAluno(){
-            var idEncontrado = buscarAluno();
 
+            var scanner = new Scanner(System.in);
+            System.out.println("Digite o ID do aluno para alterar os dados:");
+            var idUsuario = scanner.nextLine();
+            
+            System.out.println("Digite o novo nome:");
+            var novoNome = scanner.nextLine();
+
+            System.out.println("Digite seu email: ");
+            var novoEmail = scanner.nextLine();
+
+            System.out.println("Digite sua idade: ");
+            var novaIdade = scanner.nextInt();
+
+            scanner.nextLine();
 
 
             String sql = String.format("UPDATE Alunos 
-                                                    SET nome = '%s',
-                                                    email = '%s',
-                                                    idade = %d
-                                                     WHERE id = %s; ", novoNome, novoEmail, novaIdade, id);
+                                        SET nome = '%s',
+                                        email = '%s',
+                                        idade = %d
+                                        WHERE id = %s; ", novoNome, novoEmail, novaIdade, idadeUsuario);
 
             try ( var connection = DriverManager.getConnection(connectionString)){
 
                 var statement = connection.createStatement();
                 var resultSet = statement.executeUpdate(sql);
+
+                if (resultSet > 0){
+
+                    System.out.printlf("Aluno atualizado com sucesso!!! \n Id: %s, Nome: %s, Email: %s, Idade: %d", id, novoNome, novoEmail, novaIdade);
+
+                }catch(Exception e){
+
+                    System.out.println("Não foi possivel atualizar o Aluno!!");
+
+                }
 
             }
         }
@@ -70,7 +93,9 @@ import java.util.Scanner;
 
             var id = scanner.nextLine();
 
-            String sql = String.format("SELECT id, nome, email, idade FROM Alunos WHERE id = %s ;", id);
+            String sql = String.format("SELECT id, nome, email, idade 
+                                       FROM Alunos
+                                       WHERE id = %s ;", id);
 
             try (var connection = DriverManager.getConnection(connectionString)){
 
@@ -79,6 +104,7 @@ import java.util.Scanner;
             
 
                 while(resultSet.next()){
+
                     var idUsuario = resultSet.getInt("id");
                     var nameUsuario = resultSet.getString("nome");
                     var emailUsuario = resultSet.getString("email");
