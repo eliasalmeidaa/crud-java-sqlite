@@ -3,8 +3,9 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
+import static java.lang.String.format;
 
-    public  class Main {
+public  class Main {
 
         static String connectionString = "jdbc:sqlite:exemplo.db";
 
@@ -22,6 +23,7 @@ import java.util.Scanner;
                     case 2 -> consultarTodos();
                     case 3 -> buscarAluno();
                     case 4 -> atualizarAluno();
+                    case 5 -> excluirAluno();
                     default -> System.out.println("Opção Invalida!");
                 }
 
@@ -43,6 +45,34 @@ import java.util.Scanner;
             System.out.println("====================");
         }
 
+        private static void excluirAluno(){
+
+            var scanner = new Scanner(System.in);
+            System.out.println("Digite o ID do usuario que deseja excluir: ");
+            var idUsuario = scanner.nextLine();
+
+            String sql = format("DELETE FROM Alunos  WHERE id = %s", idUsuario);
+
+            try (var connection = DriverManager.getConnection(connectionString)){
+
+                var statement = connection.createStatement();
+                var resultSet = statement.executeUpdate(sql);
+
+                if(resultSet > 0){
+
+                    System.out.println("Sucesso! Usuario excluido.");
+
+                }else{
+
+                    System.out.println("Não foi possivel realizar a remoção do usuario!");
+                    
+                }
+
+            }catch (Exception e){
+                System.out.println("Não foi possivel excluir o aluno!");
+            }
+        }
+
         private static void atualizarAluno(){
 
             var scanner = new Scanner(System.in);
@@ -61,11 +91,7 @@ import java.util.Scanner;
             scanner.nextLine();
 
 
-            String sql = String.format("UPDATE Alunos 
-                                        SET nome = '%s',
-                                        email = '%s',
-                                        idade = %d
-                                        WHERE id = %s; ", novoNome, novoEmail, novaIdade, idadeUsuario);
+            String sql = format("UPDATE Alunos SET nome = '%s', email = '%s', idade = %d  WHERE id = %s" , novoNome, novoEmail, novaIdade, novaIdade, idUsuario);
 
             try ( var connection = DriverManager.getConnection(connectionString)){
 
@@ -74,14 +100,14 @@ import java.util.Scanner;
 
                 if (resultSet > 0){
 
-                    System.out.printlf("Aluno atualizado com sucesso!!! \n Id: %s, Nome: %s, Email: %s, Idade: %d", id, novoNome, novoEmail, novaIdade);
+                    System.out.printf("Aluno atualizado com sucesso!!! \n Id: %s, Nome: %s, Email: %s, Idade: %d", idUsuario, novoNome, novoEmail, novaIdade);
 
-                }catch(Exception e){
-
-                    System.out.println("Não foi possivel atualizar o Aluno!!");
-
+                }else {
+                    System.out.println("Não foi possivel atualizar o aluno");
                 }
 
+            }catch (Exception e){
+                System.out.println("Não foi ´possivel realizar a atualização!!");
             }
         }
         
@@ -91,11 +117,9 @@ import java.util.Scanner;
 
             System.out.println("Digite o seu ID:\n");
 
-            var id = scanner.nextLine();
+            var idUsuario = scanner.nextLine();
 
-            String sql = String.format("SELECT id, nome, email, idade 
-                                       FROM Alunos
-                                       WHERE id = %s ;", id);
+            String sql = String.format("SELECT id, nome, email, idade FROM Alunos WHERE id = %s ", idUsuario);
 
             try (var connection = DriverManager.getConnection(connectionString)){
 
@@ -103,22 +127,21 @@ import java.util.Scanner;
                 var resultSet = statement.executeQuery(sql);
             
 
-                while(resultSet.next()){
+                while(true){
 
-                    var idUsuario = resultSet.getInt("id");
                     var nameUsuario = resultSet.getString("nome");
                     var emailUsuario = resultSet.getString("email");
                     var idadeUsuario = resultSet.getString("idade");
 
-                    System.out.printf("Segue usuario encontrado: Nome: %s, Email: %s, Idade: %s", nameUsuario, emailUsuario, idadeUsuario);
+                    System.out.printf("Segue usuario encontrado : Id: %s, Nome: %s, Email: %s, Idade: %s",idUsuario,  nameUsuario, emailUsuario, idadeUsuario);
 
-                    return id;
+                    return idadeUsuario;
                 }
             } catch (Exception e){
                 System.out.println("Não Foi possivel buscar aluno!");
             }
 
-            return id;
+            return idUsuario;
         }
 
         private static void consultarTodos(){
@@ -159,7 +182,7 @@ import java.util.Scanner;
             var idade = scanner.nextInt();
 
             String sql = " INSERT INTO ALUNOS (nome, email, idade)";
-            sql+= String.format("VALUES('%s', '%s', '%s');", nome, email, idade);
+            sql+= format("VALUES('%s', '%s', '%s');", nome, email, idade);
 
             try (var connection = DriverManager.getConnection(connectionString)){
 
